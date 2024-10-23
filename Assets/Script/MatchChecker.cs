@@ -6,10 +6,9 @@ using UnityEngine.Serialization;
 public class MatchChecker : TemporaryMonoSingleton<MatchChecker>
 {
     public Queue<Item> queueCheck;
-    public bool isMatching;
-    
-    private const int IsMatchLength = 3;
+    public const int IsMatchLength = 3;
     private BoardManager BoardManager => SingletonManager.BoardManager;
+    private GameManager GameManager => GameManager.Instance;
     private Matrix Matrix => BoardManager.boardMatrix;
     [SerializeField] private HorizontalChecker horizontalChecker;
     [SerializeField] private VerticalChecker verticalMatching;
@@ -40,6 +39,7 @@ public class MatchChecker : TemporaryMonoSingleton<MatchChecker>
 
     private void CheckMatchItem()
     {
+        var isMatching = false;
         while (queueCheck.Count >0)
         {
             var item = queueCheck.Dequeue();
@@ -49,19 +49,26 @@ public class MatchChecker : TemporaryMonoSingleton<MatchChecker>
             horizontalChecker.Check(item);
             verticalMatching.Check(item);
             
-            
             if (verticalMatching.matchingList.Count >= IsMatchLength)
             {
                 // Debug.LogError($"matching verticalMatching:{verticalMatching.Count}");
                 MatchingItems(verticalMatching.matchingList);
+                GameManager.score += verticalMatching.matchingList.Count;
+                isMatching = true;
+                BoardManager.isSwap = false;
             }
-            
             if (horizontalChecker.matchingList.Count >= IsMatchLength)
             {
                 // Debug.LogError($"matching horizontalMatching :{horizontalMatching.Count}");
                 MatchingItems(horizontalChecker.matchingList);
+                GameManager.score += horizontalChecker.matchingList.Count;
+                isMatching = true;
+                BoardManager.isSwap = false;
             }
         }
+        if(isMatching) return;
+        if(!BoardManager.isSwap) return;
+        EventManager.OnRevertItem();
     }
     private void MatchingItems(List<Item> matchingList)
     {
@@ -73,5 +80,5 @@ public class MatchChecker : TemporaryMonoSingleton<MatchChecker>
             matchingItem.ActiveItem();
         }
     }
-   
+    
 }

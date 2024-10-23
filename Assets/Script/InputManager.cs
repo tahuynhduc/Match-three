@@ -1,21 +1,36 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class InputManager : MonoBehaviour
 {
+    public static TouchDirection direction;
+    
     [SerializeField] private float swipeThreshold;
 
     private BoardManager BoardManager => BoardManager.Instance;
-    private bool _isSelectedChess,_isSwiping;
+    private bool _isSelectedChess,_isSwiping,_touchState;
     private Vector2 _startTouchPosition, _endTouchPosition;
+
+    private void OnEnable()
+    {
+        EventManager.SwapItem += UpdateStateTouch;
+    }
+
+    private void UpdateStateTouch(bool state)
+    {
+        _touchState = state;
+    }
     private void Start()
     {
         _isSelectedChess = false;
         _isSwiping = false;
+        _touchState = true;
     }
-
+    
     void Update()
     {
+        if(!_touchState) return;
         SelectedItem();
         DetectSwipe();
     }
@@ -46,15 +61,14 @@ public class InputManager : MonoBehaviour
                 break;
         }
     }
-
     private void DetectSwipeDirection()
     {
+        
         var swipeDirection = _endTouchPosition - _startTouchPosition;
 
         if (!(swipeDirection.magnitude >= swipeThreshold)) return;
         var x = swipeDirection.x;
         var y = swipeDirection.y;
-        TouchDirection direction;
         if (Mathf.Abs(x) > Mathf.Abs(y))
         {
             direction = x > 0 ? TouchDirection.Right : TouchDirection.Left;
@@ -80,13 +94,4 @@ public class InputManager : MonoBehaviour
         EventManager.OnSelectedItem(item);
         _isSelectedChess = true;
     }
-}
-
-public enum TouchDirection
-{
-    None =0,
-    Top =1,
-    Down =2,
-    Left =3,
-    Right =4
 }

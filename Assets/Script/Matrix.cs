@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -10,9 +11,8 @@ public class Matrix
     //get item by index need parameter col ---> row
     //get item by function need parameter row --->col
     public Col<Item> matrixItem;
-    [FormerlySerializedAs("rowLength")] public int colLength;
-    [FormerlySerializedAs("colLengths")] [FormerlySerializedAs("colLength")] public int rowLength;
-    public int isMatch;
+    public int colLength;
+    public int rowLength;
     public float spaceColumn;
     public float spaceRow;
     public void Swap(Vector2 currentPos,Vector2 swapPos)
@@ -27,6 +27,28 @@ public class Matrix
         currentItem.UpdatePosition(xPosCurrent,yPosCurrent);
         swapItem.UpdatePosition(xPosSwap,yPosSwap);
         (currentItem.transform.position, swapItem.transform.position) = (swapItem.transform.position, currentItem.transform.position);
+        EventManager.OnSwapItem(true);
+
+    }
+    public void GetNearItem(TouchDirection direction,Item itemSelected,Action<Item> callbackSwap = null)
+    {
+        Item item = null;
+        switch (direction)
+        {
+            case TouchDirection.Top:
+                item = GetTop(itemSelected.posMatrix);
+                break;
+            case TouchDirection.Down:
+                item =GetDown(itemSelected.posMatrix);
+                break;
+            case TouchDirection.Left:
+                item = GetLeft(itemSelected.posMatrix);
+                break;
+            case TouchDirection.Right:
+                item = GetRight(itemSelected.posMatrix);
+                break;
+        }
+        callbackSwap?.Invoke(item);
     }
     public Item GetLeft(Vector2 pos)
     {
@@ -75,7 +97,7 @@ public class Matrix
     {
         matrixItem.colItem[y].rowItem[x] = null;
     }
-    private Item GetCurrentItem(int x,int y)
+    public Item GetCurrentItem(int x,int y)
     {
         return matrixItem.colItem[y].rowItem[x];
     }
