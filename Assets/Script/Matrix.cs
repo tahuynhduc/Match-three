@@ -6,17 +6,27 @@ using UnityEngine.Serialization;
 [Serializable]
 public class Matrix
 {
+    //with xPos = col, yPos = row
+    //get item by index need parameter col ---> row
+    //get item by function need parameter row --->col
     public Col<Item> matrixItem;
-    public int rowLength;
-    public int colLength;
+    [FormerlySerializedAs("rowLength")] public int colLength;
+    [FormerlySerializedAs("colLengths")] [FormerlySerializedAs("colLength")] public int rowLength;
     public int isMatch;
     public float spaceColumn;
     public float spaceRow;
-    public void Swap(int row1, int col1, int row2, int col2)
+    public void Swap(Vector2 currentPos,Vector2 swapPos)
     {
-        (matrixItem.colItem[col1].rowItem[row1], matrixItem.colItem[col2].rowItem[row2]) = (matrixItem.colItem[col2].rowItem[row2], matrixItem.colItem[col1].rowItem[row1]);
-        matrixItem.colItem[col1].rowItem[row1].UpdatePosition(row1,col1); 
-        matrixItem.colItem[col2].rowItem[row2].UpdatePosition(row2,col2); 
+        var xPosCurrent = (int)currentPos.x;
+        var yPosCurrent = (int)currentPos.y;
+        var xPosSwap =  (int)swapPos.x;
+        var yPosSwap =  (int)swapPos.y;
+        (matrixItem.colItem[yPosCurrent].rowItem[xPosCurrent], matrixItem.colItem[yPosSwap].rowItem[xPosSwap]) = (matrixItem.colItem[yPosSwap].rowItem[xPosSwap], matrixItem.colItem[yPosCurrent].rowItem[xPosCurrent]);
+        var currentItem = matrixItem.colItem[yPosCurrent].rowItem[xPosCurrent];
+        var swapItem = matrixItem.colItem[yPosSwap].rowItem[xPosSwap];
+        currentItem.UpdatePosition(xPosCurrent,yPosCurrent);
+        swapItem.UpdatePosition(xPosSwap,yPosSwap);
+        (currentItem.transform.position, swapItem.transform.position) = (swapItem.transform.position, currentItem.transform.position);
     }
     public Item GetLeft(Vector2 pos)
     {
@@ -61,7 +71,10 @@ public class Matrix
         // Debug.LogError($"pos top {item.posMatrix}");
         return item;
     }
-
+    public void RemoveItem(int x,int y)
+    {
+        matrixItem.colItem[y].rowItem[x] = null;
+    }
     private Item GetCurrentItem(int x,int y)
     {
         return matrixItem.colItem[y].rowItem[x];

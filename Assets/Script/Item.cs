@@ -12,6 +12,7 @@ public class Item : MonoBehaviour
     private Dictionary<Type, ColorItem> _dictColorItem;
      public ColorItem currentColor;
     
+    //with xPos = col, yPos = row;
     public Vector2 posMatrix;
     public bool isCheckedHorizontal;
     public bool isCheckedVertical;
@@ -39,9 +40,15 @@ public class Item : MonoBehaviour
         posMatrix.y = y;
     }
 
-    public void DestroyObj()
+    public void MoveDown(Vector2 pos)
     {
-        Destroy(gameObject);
+        transform.position = pos;
+    }
+    public void ActiveItem(bool state= false)
+    {
+        // Debug.LogError($"pos:{posMatrix}");
+        gameObject.SetActive(state);
+        // Destroy(gameObject);
     }
 }
 [Serializable]
