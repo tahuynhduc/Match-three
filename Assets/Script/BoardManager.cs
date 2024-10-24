@@ -13,18 +13,17 @@ public class BoardManager : TemporaryMonoSingleton<BoardManager>
     private Item _itemSelected;
     private Item _itemSwapped;
     private bool _isSpawnItem;
-    private MatchChecker MatchChecker => SingletonManager.MatchChecker;
     private GameManager GameManager => SingletonManager.GameManager;
+    private PrefabsManager PrefabsManager => SingletonManager.PrefabsManager;
+
     private void OnEnable()
     {
         EventManager.SelectedItem += OnSelectedItem;
         EventManager.RevertItem += OnRevertItem;
     }
-
-    [SerializeField] private bool testFalling;
     private void Update()
     {
-        if(testFalling) FallingItem();
+        FallingItem();
         SpawnItem();
     }
     // ReSharper disable Unity.PerformanceAnalysis
@@ -39,11 +38,10 @@ public class BoardManager : TemporaryMonoSingleton<BoardManager>
             var rowPos = boardMatrix.GetSpaceRow(row);
             var position = new Vector2(rowPos, 0);
             var item = GameManager.CloneItem(position);
-            var color = this.RandomRange(new List<Type>() { Type.Red ,Type.Black,Type.Blue,Type.Cyan,Type.Green,Type.White,Type.Grey,Type.Yellow});
             item.ActiveItem(true);
             item.UpdatePosition(row,0);
             item.MoveDown(position);
-            item.UpdateColor(color);
+            item.UpdateColor(PrefabsManager.GetColor());
             colMatrixCount[0].rowItem[row] = item;
         }
         _isSpawnItem = false;

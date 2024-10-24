@@ -5,6 +5,12 @@ public static class EventManager
     public static Action<Item> SelectedItem = delegate{};
     public static Action RevertItem = delegate { };
     public static Action<bool> SwapItem = delegate { };
+    public static Action ResetBoard = delegate { };
+
+    public static void OnResetBoard()
+    {
+        ResetBoard.Invoke();
+    }
     public static void OnRevertItem()
     {
         RevertItem.Invoke();

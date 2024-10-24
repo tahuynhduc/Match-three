@@ -10,16 +10,22 @@ public class Item : MonoBehaviour
     [SerializeField] private MeshRenderer meshRenderer;
 
     private Dictionary<Type, ColorItem> _dictColorItem;
-     public ColorItem currentColor;
+    public ColorItem currentColor;
     
     //with xPos = col, yPos = row;
     public Vector2 posMatrix;
     public bool isCheckedHorizontal;
     public bool isCheckedVertical;
-    public Vector3 Position
+    private PrefabsManager PrefabsManager => SingletonManager.PrefabsManager;
+
+
+    private void OnEnable()
     {
-        get => transform.position;
-        set => transform.position = value;
+        EventManager.ResetBoard += UpdateColor;
+    }
+    private void OnDisable()
+    {
+        EventManager.ResetBoard -= UpdateColor;
     }
     private void Awake()
     {
@@ -28,6 +34,13 @@ public class Item : MonoBehaviour
         {
             _dictColorItem.Add(item.typeItem,item);
         }
+    }
+
+    private void UpdateColor()
+    {
+        var newColor = PrefabsManager.GetColor();
+        meshRenderer.materials[0].color = _dictColorItem[newColor].colorItem;
+        currentColor = _dictColorItem[newColor];
     }
     public void UpdateColor(Type newColor)
     {

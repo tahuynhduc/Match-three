@@ -10,13 +10,15 @@ public class MatchChecker : TemporaryMonoSingleton<MatchChecker>
     private BoardManager BoardManager => SingletonManager.BoardManager;
     private GameManager GameManager => GameManager.Instance;
     private Matrix Matrix => BoardManager.boardMatrix;
+    private bool _breakMatch;
     [SerializeField] private HorizontalChecker horizontalChecker;
     [SerializeField] private VerticalChecker verticalMatching;
-    
+
     
     private void Update()
     {
         if(BoardManager.isFalling) return;
+        if(_breakMatch) return;
         CheckQueue();
     }
 
@@ -53,17 +55,19 @@ public class MatchChecker : TemporaryMonoSingleton<MatchChecker>
             {
                 // Debug.LogError($"matching verticalMatching:{verticalMatching.Count}");
                 MatchingItems(verticalMatching.matchingList);
-                GameManager.score += verticalMatching.matchingList.Count;
+                GameManager.UpdateScore(verticalMatching.matchingList.Count);;
                 isMatching = true;
                 BoardManager.isSwap = false;
+                StartCoroutine(BreakToShowEffect());
             }
             if (horizontalChecker.matchingList.Count >= IsMatchLength)
             {
                 // Debug.LogError($"matching horizontalMatching :{horizontalMatching.Count}");
                 MatchingItems(horizontalChecker.matchingList);
-                GameManager.score += horizontalChecker.matchingList.Count;
+                GameManager.UpdateScore(horizontalChecker.matchingList.Count);
                 isMatching = true;
                 BoardManager.isSwap = false;
+                StartCoroutine(BreakToShowEffect());
             }
         }
         if(isMatching) return;
@@ -80,5 +84,11 @@ public class MatchChecker : TemporaryMonoSingleton<MatchChecker>
             matchingItem.ActiveItem();
         }
     }
-    
+
+    private IEnumerator BreakToShowEffect()
+    {
+        _breakMatch = true;
+        yield return new WaitForSeconds(1f);
+        _breakMatch = false;
+    }
 }
